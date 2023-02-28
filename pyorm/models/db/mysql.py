@@ -8,11 +8,12 @@ class MysqlModel(DbModel):
         self.mysql_manager = _MysqlManager(self.table_name, self.query, self.query_mddl)
 
     def add_fk(self, table_name, fk_columns: list[Column]):
-        self.mysql_manager.add_fk(fk_columns)
+        self.mysql_manager.add_fk(table_name, fk_columns)
 
     def upd_fk(self, fk_list: list[Column]):
         for fk in fk_list:
             fk_name = self.query_mddl.query(self.query.show_fk_name(fk.name))[0]
+            print(self.query_mddl.query(self.query.show_fk_name(fk.name)))
 
             # delete and add new foreign key
             self.query_mddl.query(self.query.delete_foreign_key(self.table_name, fk_name))

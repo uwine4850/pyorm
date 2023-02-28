@@ -11,13 +11,13 @@ class CreateModel:
     """
     Model view of a specific table for migrations only.
     """
-    def __init__(self, table_name, connect: Connect):
+    def __init__(self, table_name, connect: Connect, print_log=False):
         self.table_name = table_name
         self.connect = connect
         self._columns = []
         self.query = get_current_query(self.connect)
         self._primary_key = None
-        self.query_mddl = QueryMiddleware(print_log=True)
+        self.query_mddl = QueryMiddleware(print_log=print_log)
 
         self.mysql_model = None
         self.sqlite_model = None

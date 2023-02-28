@@ -36,17 +36,20 @@ class QueryResultNormalizer(QueryResultNormalizerAbc):
     def show_tables(self, query_res: list):
         # [{'name': 'test'}]
         qres = []
-        if isinstance(query_res[0][0], list):
-            return query_res
+        if query_res[0]:
+            if isinstance(query_res[0][0], list):
+                return query_res
+            else:
+                match self.db_type:
+                    case DbType.SQLITE:
+                        for res in query_res[0]:
+                            qres.append({'Name': res['name']})
+                    case DbType.MYSQL:
+                        for res in query_res[0]:
+                            for k in res.keys():
+                                qres.append({'Name': res[k]})
+                return [qres, query_res[1]]
         else:
-            match self.db_type:
-                case DbType.SQLITE:
-                    for res in query_res[0]:
-                        qres.append({'Name': res['name']})
-                case DbType.MYSQL:
-                    for res in query_res[0]:
-                        for k in res.keys():
-                            qres.append({'Name': res[k]})
             return [qres, query_res[1]]
 
     def show_additional_fk_info(self, res: list[dict]):

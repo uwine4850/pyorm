@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from pyorm.models.columns import ColumnType, Column
+from pyorm.models.queries.sqlite_query import SqliteQuery
 
 
 class DbModel:
@@ -63,7 +64,7 @@ class DbModel:
         if delete_columns:
             for del_col in delete_columns:
                 # delete foreign key
-                if self.query_mddl.query(self.query.show_fk_name(del_col)):
+                if not isinstance(self.query, SqliteQuery) and self.query_mddl.query(self.query.show_fk_name(del_col)):
                     self.query_mddl.query(self.query.delete_foreign_key(self.table_name,
                                                                         self.query.show_fk_name(del_col)[0][0]),
                                           log=True)
@@ -156,7 +157,8 @@ class DbModel:
             db_fk = self.query_mddl.query(self.query.show_additional_fk_info(self.table_name, uf.name))[0]
             if mfk != db_fk:
                 fk_list.append(uf)
-        self.upd_fk(fk_list)
+        if fk_list:
+            self.upd_fk(fk_list)
 
     @abstractmethod
     def upd_fk(self, fk_list: list[Column]):

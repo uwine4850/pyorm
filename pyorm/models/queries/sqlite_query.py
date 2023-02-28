@@ -36,7 +36,8 @@ class SqliteQuery(Query):
         res = []
         q = self.custom_query(f"PRAGMA foreign_key_list('{table_name}');", dictionary=True)[0]
         if q:
-            res.append(q['from'])
+            for i in q:
+                res.append(i['from'])
         return [res, f"PRAGMA foreign_key_list('{table_name}');"]
 
     def show_additional_fk_info(self, table_name, column_name):
