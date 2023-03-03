@@ -1,4 +1,5 @@
-from pyorm.models.queries.sql_query import Query, column_list_to_str, column_list_to_deletecolumn_str, get_update_columns
+from pyorm.models.queries.sql_query import Query, column_list_to_str, column_list_to_deletecolumn_str, get_update_columns, \
+    insert_kwargs_to_sql, update_kwargs_to_sql, kwargs_to_sql_where
 from pyorm.connect.connection import Connect, DbType
 from pyorm.models.queries.normalizer import QueryResultNormalizer
 
@@ -52,3 +53,20 @@ class MysqlQuery(Query):
 
     def rename_column(self, table_name, old_name, new_name):
         return self.custom_query(f"ALTER TABLE {table_name} RENAME COLUMN {old_name} to {new_name};")
+
+    def select_all(self, select_name, from_table, dictionary=False):
+        return self.custom_query(f"SELECT {select_name} FROM {from_table}", dictionary=dictionary)
+
+    def select_where(self, select_name, from_table, dictionary=False, **where):
+        return self.custom_query(f"SELECT {select_name} FROM {from_table} WHERE {kwargs_to_sql_where(**where)}",
+                                 dictionary=dictionary)
+
+    def insert(self, table_name, **kwargs):
+        return self.custom_query(f"INSERT INTO `{table_name}` {insert_kwargs_to_sql(**kwargs)}")
+
+    def delete(self, table_name, **where):
+        return self.custom_query(f"DELETE FROM {table_name} WHERE {kwargs_to_sql_where(**where)}")
+
+    def update_field(self, table_name, where: dict, **kwargs):
+        return self.custom_query(f"UPDATE `{table_name}` SET {update_kwargs_to_sql(**kwargs)} "
+                                 f"WHERE {kwargs_to_sql_where(**where)}")

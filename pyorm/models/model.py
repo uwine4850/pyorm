@@ -1,6 +1,6 @@
 from pyorm.models.columns import ColumnMixin, Column, ColumnType, PrimaryKey
 from pyorm.connect.connection import Connect, DbType
-from pyorm.models.queries.sql_query import get_current_query, QueryMiddleware
+from pyorm.models.queries.sql_query import get_current_query, QueryMiddleware, kwargs_to_sql_where
 from abc import abstractmethod
 from typing import Type
 from pyorm.models.db.mysql import MysqlModel
@@ -84,3 +84,33 @@ class ManageMigrate:
         self._create_tables()
         for model in self.models:
             model(self.connection).migrate()
+
+
+class TableView:
+    def __init__(self, table_name: str, connection: Connect, print_log=False):
+        self.table_name = table_name
+        self.connection = connection
+        self.query = get_current_query(self.connection)
+        self.query_mddl = QueryMiddleware(print_log=print_log)
+
+    def all(self, dictionary=False):
+        return self.query_mddl.query(self.query.select_all('*', self.table_name, dictionary=dictionary))
+
+    def filter(self, dictionary=False, **kwargs):
+        return self.query_mddl.query(self.query.select_where('*', self.table_name, dictionary=dictionary, **kwargs))
+
+    def get(self, dictionary=False, **kwargs):
+        where = kwargs_to_sql_where(**kwargs)
+        return self.query_mddl.query(
+            self.query.custom_query(f"SELECT * FROM {self.table_name} WHERE {where} "
+                                    f"ORDER BY {list(kwargs.keys())[0]} LIMIT 1", dictionary=dictionary)
+        )
+
+    def insert(self, **kwargs):
+        return self.query_mddl.query(self.query.insert(self.table_name, **kwargs))
+
+    def delete(self, **kwargs):
+        return self.query_mddl.query(self.query.delete(self.table_name, **kwargs))
+
+    def update(self, where: dict, **kwargs):
+        self.query_mddl.query(self.query.update_field(self.table_name, where, **kwargs))

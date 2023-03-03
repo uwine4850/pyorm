@@ -61,6 +61,26 @@ class Query:
     def rename_column(self, table_name, old_name, new_name):
         pass
 
+    @abstractmethod
+    def select_all(self, select_name, from_table, dictionary=False):
+        pass
+
+    @abstractmethod
+    def select_where(self, select_name, from_table, where, dictionary=False):
+        pass
+
+    @abstractmethod
+    def insert(self, table_name, **kwargs):
+        pass
+
+    @abstractmethod
+    def delete(self, table_name, where):
+        pass
+
+    @abstractmethod
+    def update_field(self, table_name, where: dict, **kwargs):
+        pass
+
 
 class QueryMiddleware:
     def __init__(self, print_log=False):
@@ -71,6 +91,43 @@ class QueryMiddleware:
         if self.print_log and log:
             print('--', query_str, '|', info)
         return query_res
+
+
+def update_kwargs_to_sql(**kwargs):
+    upd = ''
+
+    for x, i in enumerate(kwargs):
+        if x == len(kwargs)-1:
+            upd += f"`{i}` = '{kwargs[i]}'"
+        else:
+            upd += f"`{i}` = '{kwargs[i]}', "
+    return upd
+
+
+def kwargs_to_sql_where(**kwargs):
+    where = ''
+    for x, i in enumerate(kwargs):
+        if x == len(kwargs)-1:
+            where += f"{i}='{kwargs[i]}'"
+        else:
+            where += f"{i}='{kwargs[i]}' && "
+    return where
+
+
+def insert_kwargs_to_sql(**kwargs):
+    cols = '('
+    values = 'VALUES ('
+
+    for x, i in enumerate(kwargs):
+        if x == len(kwargs)-1:
+            cols += f"`{i}`) "
+            values += f"'{kwargs[i]}')"
+        else:
+            cols += f"`{i}`, "
+            values += f"'{kwargs[i]}', "
+
+    res = cols + values
+    return res
 
 
 def column_list_to_str(columns: list[str]):
