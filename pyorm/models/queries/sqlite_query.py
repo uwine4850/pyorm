@@ -75,6 +75,7 @@ class SqliteQuery(Query):
         return self.custom_query(f"INSERT INTO `{table_name}` {insert_kwargs_to_sql(**kwargs)}")
 
     def delete(self, table_name, **where):
+        self.custom_query('PRAGMA foreign_keys=ON;')
         return self.custom_query(f"DELETE FROM {table_name} WHERE {kwargs_to_sql_where(**where)}")
 
     def update_field(self, table_name, where: dict, **kwargs):

@@ -110,7 +110,7 @@ def kwargs_to_sql_where(**kwargs):
         if x == len(kwargs)-1:
             where += f"{i}='{kwargs[i]}'"
         else:
-            where += f"{i}='{kwargs[i]}' && "
+            where += f"{i}='{kwargs[i]}' AND "
     return where
 
 

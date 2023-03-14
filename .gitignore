@@ -1,7 +1,7 @@
 .idea
 venv
 __pycache__
-main.py
+test4/main.py
 q.db
 dist
 pyorm.egg-info

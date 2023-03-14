@@ -19,7 +19,7 @@ class SqliteConnect:
                         connect.row_factory = self._dict_factory
 
                     cur = connect.cursor()
-                    cur.execute('PRAGMA foreign_keys = 1;')
+                    cur.execute('PRAGMA foreign_keys=ON;')
                     cur.execute(query_string)
                     result = []
                     for res in cur.fetchall():
